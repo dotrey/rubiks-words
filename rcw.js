@@ -52,10 +52,10 @@
             }
             return r;
         }
-        toString() {
+        toString(spacer = "") {
             return this.sides.map((side) => {
                 return side.join("");
-            }).join(" ");
+            }).join(spacer);
         }
         prettyPrint() {
             let r = `
@@ -130,94 +130,124 @@
         }
     }
 
-    let cube = null;
-    function buildCube() {
-        let order = "ULFRBD";
-        let colors = [];
-        document.querySelectorAll(".cube-side input").forEach((element) => {
-            let i = order.indexOf(element.name[0]);
-            let position = i * 9 + parseInt(element.name[1]);
-            colors[position] = element.value;
-        });
-        let cube = Cube.fromString(colors);
-        return cube;
-    }
-    function rotateCube(cube) {
-        let rotation = [0, 0, 0, 0, 0, 0];
-        let sides = "ULFRBD";
-        let list = document.querySelector("ol");
-        let append = (value) => {
+    class Ui {
+        constructor(finder) {
+            this.finder = finder;
+        }
+        build() {
+            this.createButtons();
+            this.createInputs(document.querySelector(".cube-side.up"), "U");
+            this.createInputs(document.querySelector(".cube-side.left"), "L");
+            this.createInputs(document.querySelector(".cube-side.front"), "F");
+            this.createInputs(document.querySelector(".cube-side.right"), "R");
+            this.createInputs(document.querySelector(".cube-side.back"), "B");
+            this.createInputs(document.querySelector(".cube-side.down"), "D");
+        }
+        clearList() {
+            if (!this.resultList) {
+                this.resultList = document.querySelector("ol");
+            }
+            this.resultList.innerHTML = "";
+        }
+        appendList(value) {
+            if (!this.resultList) {
+                this.resultList = document.querySelector("ol");
+            }
             let e = document.createElement("li");
             e.innerText = value;
-            list.append(e);
-            e.scrollIntoView();
-        };
-        append(cube.toString());
-        let done = false;
-        let next = () => {
-            rotation[0]++;
-            cube.rotate(sides[0]);
-            for (let i = 0; i < 6; i++) {
-                if (rotation[i] >= 4) {
-                    if (i + 1 >= 6) {
-                        done = true;
-                    }
-                    else {
-                        rotation[i] = 0;
-                        cube.rotate(sides[i + 1]);
-                        rotation[i + 1]++;
-                    }
+            this.resultList.append(e);
+        }
+        createButtons() {
+            var _a;
+            let button = document.createElement("button");
+            button.type = "button";
+            button.innerText = "start";
+            button.addEventListener("click", () => {
+                this.finder.start(this.exportInput());
+            });
+            (_a = document.querySelector(".buttons")) === null || _a === void 0 ? void 0 : _a.append(button);
+        }
+        createInputs(container, prefix) {
+            for (let i = 0; i < 9; i++) {
+                let e = document.createElement("input");
+                e.type = "text";
+                e.maxLength = 1;
+                e.name = prefix + i;
+                e.style.gridArea = "abcdefghi"[i];
+                container.append(e);
+                e.scrollIntoView();
+            }
+        }
+        fillInputs(values) {
+            document.querySelectorAll(".cube-side input").forEach((element, index) => {
+                if (typeof values[index] !== "undefined") {
+                    element.value = values[index];
                 }
-            }
-            append(cube.toString());
-            if (!done) {
-                window.requestAnimationFrame(next);
-            }
-        };
-        next();
-    }
-    function createButtons() {
-        var _a;
-        let button = document.createElement("button");
-        button.type = "button";
-        button.innerText = "start";
-        button.addEventListener("click", () => {
-            cube = buildCube();
-            rotateCube(cube);
-        });
-        (_a = document.querySelector(".buttons")) === null || _a === void 0 ? void 0 : _a.append(button);
-    }
-    function createInputs(container, prefix) {
-        for (let i = 0; i < 9; i++) {
-            let e = document.createElement("input");
-            e.type = "text";
-            e.maxLength = 1;
-            e.name = prefix + i;
-            e.style.gridArea = "abcdefghi"[i];
-            container.append(e);
+            });
+        }
+        exportInput() {
+            let value = "";
+            document.querySelectorAll(".cube-side input").forEach((element, index) => {
+                value += element.value || ".";
+            });
+            return value;
         }
     }
-    function fillInputs(values) {
-        document.querySelectorAll(".cube-side input").forEach((element, index) => {
-            if (typeof values[index] !== "undefined") {
-                element.value = values[index];
+
+    class Finder {
+        constructor() {
+            this.wordlist = [];
+            this.moveset = ["F", "R", "U", "L", "B", "D", "F'", "R'", "U'", "L'", "B'", "D'"];
+            this.attempts = 0;
+            this.maxAttempts = 10000;
+            this.ui = new Ui(this);
+            this.ui.build();
+            this.ui.fillInputs("scinsushlmtmoneiyifateebneertstmrindescthekatdlnabitna");
+        }
+        start(colors) {
+            this.cube = Cube.fromString(colors);
+            this.ui.clearList();
+            this.attempts = 0;
+            this.random();
+        }
+        random() {
+            this.attempts++;
+            if (this.attempts % 1000 === 0) {
+                this.ui.appendList("attempt #" + this.attempts);
             }
-        });
+            let move = this.randomMove();
+            this.cube.rotate(move[0], move.length > 1);
+            this.check();
+            if (this.attempts < this.maxAttempts) {
+                window.requestAnimationFrame(() => {
+                    this.random();
+                });
+            }
+        }
+        check() {
+            let value = this.cube.toString();
+            let double = value + value;
+            let reversed = double.split("").reverse().join("");
+            for (let word of this.wordlist) {
+                if (double.indexOf(word) > -1) {
+                    this.ui.appendList(value + " -> " + word);
+                }
+                if (reversed.indexOf(word) > -1) {
+                    this.ui.appendList(value + " <- " + word);
+                }
+            }
+        }
+        randomMove() {
+            return this.moveset[Math.floor(Math.random() * this.moveset.length)];
+        }
+        export() {
+            return this.ui.exportInput();
+        }
+        import(colors) {
+            this.ui.fillInputs(colors);
+        }
     }
-    window.exportInput = () => {
-        let value = "";
-        document.querySelectorAll(".cube-side input").forEach((element, index) => {
-            value += element.value || ".";
-        });
-        return value;
-    };
-    createButtons();
-    createInputs(document.querySelector(".cube-side.up"), "U");
-    createInputs(document.querySelector(".cube-side.left"), "L");
-    createInputs(document.querySelector(".cube-side.front"), "F");
-    createInputs(document.querySelector(".cube-side.right"), "R");
-    createInputs(document.querySelector(".cube-side.back"), "B");
-    createInputs(document.querySelector(".cube-side.down"), "D");
-    fillInputs("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ12");
+
+    window.rcw = new Finder();
 
 }());

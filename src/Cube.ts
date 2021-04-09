@@ -80,10 +80,10 @@ export class Cube {
         return r;
     }
 
-    toString() {
+    toString(spacer : string = "") {
         return this.sides.map((side : string[]) => {
             return side.join("");
-        }).join(" ");
+        }).join(spacer);
     }
 
     prettyPrint() {
