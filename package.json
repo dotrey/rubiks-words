@@ -1,0 +1,28 @@
+{
+    "name": "rubiks-cube-words",
+    "version": "0.1.0",
+    "scripts": {
+        "test": "ts-mocha -p ./tsconfig.mocha.json src/**/*.spec.ts",
+        "build": "tsc && npx rollup --config",
+        "bundle": "npm run bundle-css && npm run build",
+        "bundle-css": "postcss ./assets/style/style.css -o ./assets/style/style.bundle.css"
+    },
+    "devDependencies": {
+        "@rollup/plugin-commonjs": "^17.0.0",
+        "@rollup/plugin-node-resolve": "^11.0.1",
+        "@types/chai": "^4.2.14",
+        "@types/mithril": "^2.0.6",
+        "@types/mocha": "^8.2.0",
+        "chai": "*",
+        "mocha": "^7.0.0",
+        "mock-local-storage": "^1.1.17",
+        "postcss-cli": "^7.1.1",
+        "postcss-import": "^12.0.1",
+        "rollup": "^2.38.1",
+        "rollup-plugin-filesize": "^9.1.0",
+        "rollup-plugin-terser": "^7.0.2",
+        "ts-mocha": "^7.0.0",
+        "ts-node": "^9.1.1",
+        "typescript": "^4.1.3"
+    }
+}

@@ -1,0 +1,73 @@
+.cube {
+    position: relative;
+    display: grid;
+    grid-template-columns: 150px 150px 150px 150px;
+    grid-template-rows: 150px 150px 150px;
+    grid-template-areas: 
+        "buttons up . ."
+        "left front right back"
+        ". down . ."
+    ;
+    align-items: start;
+    justify-items: start;
+}
+
+.buttons {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    grid-area: buttons;
+}
+
+.cube-side {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    display: grid;
+    grid-template-columns: 50px 50px 50px;
+    grid-template-rows: 50px 50px 50px;
+    grid-template-areas: 
+        "a b c"
+        "d e f"
+        "g h i"
+    ;
+    justify-items: center;
+    align-items: center;
+    border: 1px solid #000;
+}
+
+.cube-side.up {
+    grid-area: up;
+}
+
+.cube-side.left {
+    grid-area: left;
+}
+
+.cube-side.front {
+    grid-area: front;
+}
+
+.cube-side.right {
+    grid-area: right;
+}
+
+.cube-side.back {
+    grid-area: back;
+}
+
+.cube-side.down {
+    grid-area: down;
+}
+
+.cube-side input[type=text] {
+    position: relative;
+    display: block;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    margin: 0;
+    line-height: 40px;
+    text-align: center;
+    border: 1px solid #999;
+}
