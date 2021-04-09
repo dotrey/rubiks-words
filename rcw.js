@@ -156,6 +156,7 @@
             let e = document.createElement("li");
             e.innerText = value;
             this.resultList.append(e);
+            e.scrollIntoView();
         }
         createButtons() {
             var _a;
@@ -175,7 +176,6 @@
                 e.name = prefix + i;
                 e.style.gridArea = "abcdefghi"[i];
                 container.append(e);
-                e.scrollIntoView();
             }
         }
         fillInputs(values) {
