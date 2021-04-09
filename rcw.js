@@ -197,7 +197,7 @@
     class Finder {
         constructor() {
             this.wordlist = [];
-            this.moveset = ["F", "R", "U", "L", "B", "D", "F'", "R'", "U'", "L'", "B'", "D'"];
+            this.moveset = ["F", "R", "U", "L", "B", "D",];
             this.attempts = 0;
             this.maxAttempts = 10000;
             this.ui = new Ui(this);

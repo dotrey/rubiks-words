@@ -5,7 +5,7 @@ export class Finder {
     private cube : Cube;
     private ui : Ui;
     wordlist : string[] = [];
-    private moveset : string[] = ["F", "R", "U", "L", "B", "D", "F'", "R'", "U'", "L'", "B'", "D'"];
+    private moveset : string[] = ["F", "R", "U", "L", "B", "D", ]; //"F'", "R'", "U'", "L'", "B'", "D'"];
     private attempts : number = 0;
     maxAttempts : number = 10000;
 
