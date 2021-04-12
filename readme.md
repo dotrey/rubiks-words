@@ -1,5 +1,5 @@
 # Rubik's Cube Words
-This little tool was created for the getDigital Easter Quiz 2021, question 27
+This little tool was created for the getDigital Easter Quiz 2021, question 27.
 
 # How to use
 
