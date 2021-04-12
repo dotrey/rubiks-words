@@ -89,7 +89,7 @@ export class Cube {
         }).join(spacer);
     }
 
-    prettyPrint() {
+    pretty() {
         let r = 
 `         +–––––––+
          | ${this.sides[0][0]} ${this.sides[0][1]} ${this.sides[0][2]} |
@@ -104,6 +104,11 @@ export class Cube {
          | ${this.sides[5][3]} ${this.sides[5][4]} ${this.sides[5][5]} |
          | ${this.sides[5][6]} ${this.sides[5][7]} ${this.sides[5][8]} |
          +–––––––+`;
+        return r;
+    }
+
+    prettyPrint() {
+        let r = this.pretty();
         console.log(r);
         return r;
     }

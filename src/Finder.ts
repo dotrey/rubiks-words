@@ -25,7 +25,7 @@ export class Finder {
 
     build(colors : string) {
         this.cube = Cube.fromString(colors);
-        this.ui.setMonospace(this.cube.prettyPrint());
+        this.ui.setMonospace(this.cube.pretty());
     }
 
     rotate(move : string) {
@@ -33,7 +33,7 @@ export class Finder {
             return;
         }
         this.cube.rotate(move[0], move.length === 2);
-        this.ui.setMonospace(this.cube.prettyPrint());
+        this.ui.setMonospace(this.cube.pretty());
     }
 
     startRandom(rawWords : string) {
@@ -60,6 +60,11 @@ export class Finder {
             }
         }
 
+        // for double-moves the notation must be X2, where X is the original move
+        // -> R'R' must be written as R'2 and not R2'
+        // -> we correct this here
+        rawMoves = rawMoves.replace(/2'/g, "'2");
+
         let moves : string[] = [];
         for (let i = 0, ic = rawMoves.length; i < ic; i++) {
             let tmp = rawMoves[i];
@@ -67,8 +72,12 @@ export class Finder {
                 if (moves[moves.length - 1].length === 1) {
                     moves[moves.length - 1] += "'";
                 }
+            }else if (tmp === "2" && moves.length > 0) {
+                moves.push(moves[moves.length - 1]);
             }else if (this.moveset.indexOf(tmp) > -1) {
-                moves.push(tmp)
+                moves.push(tmp);
+            }else if (tmp.trim()) {
+                console.log("unknown move: '" + tmp + "'");
             }
         }
 
@@ -88,7 +97,7 @@ export class Finder {
         let move = this.randomMoveNoCcw();
         this.cube.rotate(move[0], move.length > 1);
         this.check();
-        this.ui.setMonospace(this.cube.prettyPrint());
+        this.ui.setMonospace(this.cube.pretty());
         this.ui.setCounter(this.attempts);
         if (this.randomRunning) {
             window.requestAnimationFrame(() => {

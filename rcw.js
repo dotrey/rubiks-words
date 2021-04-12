@@ -58,7 +58,7 @@
                 return side.join("");
             }).join(spacer);
         }
-        prettyPrint() {
+        pretty() {
             let r = `         +–––––––+
          | ${this.sides[0][0]} ${this.sides[0][1]} ${this.sides[0][2]} |
          | ${this.sides[0][3]} ${this.sides[0][4]} ${this.sides[0][5]} |
@@ -72,6 +72,10 @@
          | ${this.sides[5][3]} ${this.sides[5][4]} ${this.sides[5][5]} |
          | ${this.sides[5][6]} ${this.sides[5][7]} ${this.sides[5][8]} |
          +–––––––+`;
+            return r;
+        }
+        prettyPrint() {
+            let r = this.pretty();
             console.log(r);
             return r;
         }
@@ -340,14 +344,14 @@
         }
         build(colors) {
             this.cube = Cube.fromString(colors);
-            this.ui.setMonospace(this.cube.prettyPrint());
+            this.ui.setMonospace(this.cube.pretty());
         }
         rotate(move) {
             if (!this.cube || this.moveset.indexOf(move) < 0) {
                 return;
             }
             this.cube.rotate(move[0], move.length === 2);
-            this.ui.setMonospace(this.cube.prettyPrint());
+            this.ui.setMonospace(this.cube.pretty());
         }
         startRandom(rawWords) {
             if (!this.cube) {
@@ -370,6 +374,7 @@
                     rawMoves = rawMoves.replace(new RegExp(de, "g"), this.germanMovesetMap[de]);
                 }
             }
+            rawMoves = rawMoves.replace(/2'/g, "'2");
             let moves = [];
             for (let i = 0, ic = rawMoves.length; i < ic; i++) {
                 let tmp = rawMoves[i];
@@ -378,8 +383,14 @@
                         moves[moves.length - 1] += "'";
                     }
                 }
+                else if (tmp === "2" && moves.length > 0) {
+                    moves.push(moves[moves.length - 1]);
+                }
                 else if (this.moveset.indexOf(tmp) > -1) {
                     moves.push(tmp);
+                }
+                else if (tmp.trim()) {
+                    console.log("unknown move: '" + tmp + "'");
                 }
             }
             console.log("executing moves: " + moves.join(" "));
@@ -397,7 +408,7 @@
             let move = this.randomMoveNoCcw();
             this.cube.rotate(move[0], move.length > 1);
             this.check();
-            this.ui.setMonospace(this.cube.prettyPrint());
+            this.ui.setMonospace(this.cube.pretty());
             this.ui.setCounter(this.attempts);
             if (this.randomRunning) {
                 window.requestAnimationFrame(() => {
