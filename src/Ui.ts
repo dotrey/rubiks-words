@@ -3,6 +3,7 @@ import { Finder } from "./Finder";
 export class Ui {
 
     private resultList : HTMLElement;
+    private monospace : HTMLElement;
 
     constructor(private finder : Finder) {
 
@@ -35,14 +36,57 @@ export class Ui {
         e.scrollIntoView();
     }
 
+    setMonospace(value : string) {
+        if (!this.monospace) {
+            this.monospace = document.querySelector(".monospace");
+        }
+        this.monospace.innerText = value;
+    }
+
     private createButtons() {
-        let button = document.createElement("button");
-        button.type = "button";
-        button.innerText = "start";
-        button.addEventListener("click", () => {
-            this.finder.start(this.exportInput());
+        let btns1 = document.querySelector(".buttons-main");
+        let btnCreate = document.createElement("button");
+        btnCreate.type = "button";
+        btnCreate.innerText = "create";
+        btnCreate.addEventListener("click", () => {
+            this.finder.build(this.exportInput());
         })
-        document.querySelector(".buttons")?.append(button);
+        btns1?.append(btnCreate);
+        
+        let btnRandom = document.createElement("button");
+        btnRandom.type = "button";
+        btnRandom.innerText = "random";
+        btnRandom.addEventListener("click", () => {
+            this.finder.startRandom();
+        })
+        btns1?.append(btnRandom);
+
+        let btns2 = document.querySelector(".buttons-rotate");
+        let buttons : {[index : string] : string} = {
+            "F" : "Front",
+            "R" : "Right",
+            "U" : "Up",
+            "L" : "Left",
+            "B" : "Back",
+            "D" : "Down",
+            "F'" : "Front CCW",
+            "R'" : "Right CCW",
+            "U'" : "Up CCW",
+            "L'" : "Left CCW",
+            "B'" : "Back CCW",
+            "D'" : "Down CCW"
+        }
+
+        for (let key in buttons) {
+            let tmp = document.createElement("button");
+            tmp.innerText = buttons[key];
+            tmp.addEventListener("click", ((m : string) => {
+                return () => {
+                    this.finder.rotate(m);
+                }
+            })(key));
+            btns2?.append(tmp);
+        }
     }
     
     private createInputs(container : HTMLElement, prefix : string) {

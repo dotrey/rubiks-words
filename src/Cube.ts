@@ -88,8 +88,7 @@ export class Cube {
 
     prettyPrint() {
         let r = 
-`
-         +–––––––+
+`         +–––––––+
          | ${this.sides[0][0]} ${this.sides[0][1]} ${this.sides[0][2]} |
          | ${this.sides[0][3]} ${this.sides[0][4]} ${this.sides[0][5]} |
          | ${this.sides[0][6]} ${this.sides[0][7]} ${this.sides[0][8]} |
@@ -101,8 +100,7 @@ export class Cube {
          | ${this.sides[5][0]} ${this.sides[5][1]} ${this.sides[5][2]} |
          | ${this.sides[5][3]} ${this.sides[5][4]} ${this.sides[5][5]} |
          | ${this.sides[5][6]} ${this.sides[5][7]} ${this.sides[5][8]} |
-         +–––––––+
-`;
+         +–––––––+`;
         console.log(r);
         return r;
     }

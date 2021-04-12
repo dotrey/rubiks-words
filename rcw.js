@@ -58,8 +58,7 @@
             }).join(spacer);
         }
         prettyPrint() {
-            let r = `
-         +–––––––+
+            let r = `         +–––––––+
          | ${this.sides[0][0]} ${this.sides[0][1]} ${this.sides[0][2]} |
          | ${this.sides[0][3]} ${this.sides[0][4]} ${this.sides[0][5]} |
          | ${this.sides[0][6]} ${this.sides[0][7]} ${this.sides[0][8]} |
@@ -71,8 +70,7 @@
          | ${this.sides[5][0]} ${this.sides[5][1]} ${this.sides[5][2]} |
          | ${this.sides[5][3]} ${this.sides[5][4]} ${this.sides[5][5]} |
          | ${this.sides[5][6]} ${this.sides[5][7]} ${this.sides[5][8]} |
-         +–––––––+
-`;
+         +–––––––+`;
             console.log(r);
             return r;
         }
@@ -158,15 +156,53 @@
             this.resultList.append(e);
             e.scrollIntoView();
         }
+        setMonospace(value) {
+            if (!this.monospace) {
+                this.monospace = document.querySelector(".monospace");
+            }
+            this.monospace.innerText = value;
+        }
         createButtons() {
-            var _a;
-            let button = document.createElement("button");
-            button.type = "button";
-            button.innerText = "start";
-            button.addEventListener("click", () => {
-                this.finder.start(this.exportInput());
+            let btns1 = document.querySelector(".buttons-main");
+            let btnCreate = document.createElement("button");
+            btnCreate.type = "button";
+            btnCreate.innerText = "create";
+            btnCreate.addEventListener("click", () => {
+                this.finder.build(this.exportInput());
             });
-            (_a = document.querySelector(".buttons")) === null || _a === void 0 ? void 0 : _a.append(button);
+            btns1 === null || btns1 === void 0 ? void 0 : btns1.append(btnCreate);
+            let btnRandom = document.createElement("button");
+            btnRandom.type = "button";
+            btnRandom.innerText = "random";
+            btnRandom.addEventListener("click", () => {
+                this.finder.startRandom();
+            });
+            btns1 === null || btns1 === void 0 ? void 0 : btns1.append(btnRandom);
+            let btns2 = document.querySelector(".buttons-rotate");
+            let buttons = {
+                "F": "Front",
+                "R": "Right",
+                "U": "Up",
+                "L": "Left",
+                "B": "Back",
+                "D": "Down",
+                "F'": "Front CCW",
+                "R'": "Right CCW",
+                "U'": "Up CCW",
+                "L'": "Left CCW",
+                "B'": "Back CCW",
+                "D'": "Down CCW"
+            };
+            for (let key in buttons) {
+                let tmp = document.createElement("button");
+                tmp.innerText = buttons[key];
+                tmp.addEventListener("click", ((m) => {
+                    return () => {
+                        this.finder.rotate(m);
+                    };
+                })(key));
+                btns2 === null || btns2 === void 0 ? void 0 : btns2.append(tmp);
+            }
         }
         createInputs(container, prefix) {
             for (let i = 0; i < 9; i++) {
@@ -197,15 +233,28 @@
     class Finder {
         constructor() {
             this.wordlist = [];
-            this.moveset = ["F", "R", "U", "L", "B", "D",];
+            this.moveset = ["F", "R", "U", "L", "B", "D", "F'", "R'", "U'", "L'", "B'", "D'"];
             this.attempts = 0;
             this.maxAttempts = 10000;
             this.ui = new Ui(this);
             this.ui.build();
             this.ui.fillInputs("scinsushlmtmoneiyifateebneertstmrindescthekatdlnabitna");
         }
-        start(colors) {
+        build(colors) {
             this.cube = Cube.fromString(colors);
+            this.ui.setMonospace(this.cube.prettyPrint());
+        }
+        rotate(move) {
+            if (!this.cube || this.moveset.indexOf(move) < 0) {
+                return;
+            }
+            this.cube.rotate(move[0], move.length === 2);
+            this.ui.setMonospace(this.cube.prettyPrint());
+        }
+        startRandom() {
+            if (!this.cube) {
+                return;
+            }
             this.ui.clearList();
             this.attempts = 0;
             this.random();
@@ -215,9 +264,10 @@
             if (this.attempts % 1000 === 0) {
                 this.ui.appendList("attempt #" + this.attempts);
             }
-            let move = this.randomMove();
+            let move = this.randomMoveNoCcw();
             this.cube.rotate(move[0], move.length > 1);
             this.check();
+            this.ui.setMonospace(this.cube.prettyPrint());
             if (this.attempts < this.maxAttempts) {
                 window.requestAnimationFrame(() => {
                     this.random();
@@ -228,6 +278,7 @@
             let value = this.cube.toString();
             let double = value + value;
             let reversed = double.split("").reverse().join("");
+            value = this.cube.toString(" ");
             for (let word of this.wordlist) {
                 if (double.indexOf(word) > -1) {
                     this.ui.appendList(value + " -> " + word);
@@ -239,6 +290,9 @@
         }
         randomMove() {
             return this.moveset[Math.floor(Math.random() * this.moveset.length)];
+        }
+        randomMoveNoCcw() {
+            return this.moveset[Math.floor(Math.random() * this.moveset.length * 0.5)];
         }
         export() {
             return this.ui.exportInput();

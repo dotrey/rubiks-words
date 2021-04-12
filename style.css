@@ -4,19 +4,42 @@
     grid-template-columns: 150px 150px 150px 150px;
     grid-template-rows: 150px 150px 150px;
     grid-template-areas: 
-        "buttons up . ."
+        "btn1 up . ."
         "left front right back"
-        ". down . ."
+        ". down btn2 btn2"
     ;
     align-items: start;
     justify-items: start;
 }
 
-.buttons {
+.buttons-main {
     position: relative;
     width: 150px;
     height: 150px;
-    grid-area: buttons;
+    grid-area: btn1;
+}
+
+.buttons-rotate {
+    position: relative;
+    width: 300px;
+    height: 150px;
+    grid-area: btn2;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(6, 50px);
+    grid-template-rows: 75px 75px;
+    justify-items: center;
+    align-items: center;
+}
+
+.monospace {
+    position: relative;
+    font-size: 30px;
+    font-family: monospace;
+    width: 19.5em;
+    background: #eee;
+    white-space: pre;
+    margin: 10px 0;
 }
 
 .cube-side {
