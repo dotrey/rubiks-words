@@ -4,19 +4,21 @@
     grid-template-columns: 150px 150px 150px 150px;
     grid-template-rows: 150px 150px 150px;
     grid-template-areas: 
-        "btn1 up . ."
+        "btn1 up rnd rnd"
         "left front right back"
-        ". down btn2 btn2"
+        "exec down btn2 btn2"
     ;
     align-items: start;
     justify-items: start;
 }
 
-.buttons-main {
+.buttons {
     position: relative;
     width: 150px;
     height: 150px;
     grid-area: btn1;
+    box-sizing: border-box;
+    padding: 8px;
 }
 
 .buttons-rotate {
@@ -27,9 +29,47 @@
     box-sizing: border-box;
     display: grid;
     grid-template-columns: repeat(6, 50px);
-    grid-template-rows: 75px 75px;
+    grid-template-rows: repeat(3, 50px);
     justify-items: center;
     align-items: center;
+}
+
+.buttons-rotate input[type=text] {
+    grid-column: 1/6;
+    justify-self: start;
+    margin-left: 11px;
+    width: 220px;
+}
+
+.random {
+    position: relative;
+    width: 300px;
+    height: 150px;
+    grid-area: rnd;
+    box-sizing: border-box;
+    padding: 8px;
+}
+
+.random textarea {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.execute {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    grid-area: exec;
+    box-sizing: border-box;
+    padding: 8px;
+}
+
+.execute textarea {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: 50px;
+    margin-bottom: 8px;;
 }
 
 .monospace {

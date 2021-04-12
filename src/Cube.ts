@@ -24,7 +24,10 @@ export class Cube {
      *            +––––––––––+
      */
     private sides : string[][] = [];
+    // Up Left Front Right Back Down
     private sideOrder : string = "ULFRBD";
+    // Middle (between L and R), Equator (between U and D), Standing (between F and B)
+    private axis : string = "MES";
     // adjacent faces in the order they would rotate if the primary side is rotated clockwise
     private adjacentFaces : {[index : string]:string[]} = {
         "U" : [
@@ -113,6 +116,11 @@ export class Cube {
      */
     rotate(side : string, ccw : boolean = false) {
         side = side.toUpperCase();
+        if (this.axis.indexOf(side) > -1) {
+            this.rotateAxis(side, ccw);
+            return;
+        }
+
         if (this.sideOrder.indexOf(side) < 0) {
             throw new Error("Unknown side " + side);
         }
@@ -129,6 +137,73 @@ export class Cube {
         // Adjacent sides
         for (let i = 0; i < 12; i++) {
             changes[this.adjacentFaces[side][i]] = this.adjacentFaces[side][(i + 3) % 12];
+        }
+
+        if (ccw) {
+            // reverse
+            let tmp : {[index : string] : string} = {};
+            for (let key in changes) {
+                tmp[changes[key]] = key;
+            }
+            changes = tmp;
+        }
+
+        this.changeFaces(changes);
+    }
+
+    private rotateAxis(axis : string, ccw : boolean = false) {
+        let changes : {[index : string] : string} = {};
+        if (axis === "M") {
+            // rotate the layer between L and R in the same direction as L
+            changes["F1"] = "D1";
+            changes["F4"] = "D4";
+            changes["F7"] = "D7";
+
+            changes["D1"] = "B1";
+            changes["D4"] = "B4";
+            changes["D7"] = "B7";
+
+            changes["B1"] = "U1";
+            changes["B4"] = "U4";
+            changes["B7"] = "U7";
+
+            changes["U1"] = "F1";
+            changes["U4"] = "F4";
+            changes["U7"] = "F7";
+        }else if (axis === "E") {
+            // rotate the layer between U and D in the same direction as D
+            changes["F3"] = "R3";
+            changes["F4"] = "R4";
+            changes["F5"] = "R5";
+
+            changes["R3"] = "B3";
+            changes["R4"] = "B4";
+            changes["R5"] = "B5";
+
+            changes["B3"] = "L3";
+            changes["B4"] = "L4";
+            changes["B5"] = "L5";
+
+            changes["L3"] = "F3";
+            changes["L4"] = "F4";
+            changes["L5"] = "F5";
+        }else if (axis === "S") {
+            // rotate the layer between F and B in the same direction as F
+            changes["U3"] = "R1";
+            changes["U4"] = "R4";
+            changes["U5"] = "R7";
+
+            changes["R1"] = "D5";
+            changes["R4"] = "D4";
+            changes["R7"] = "D3";
+
+            changes["D3"] = "L1";
+            changes["D4"] = "L4";
+            changes["D5"] = "L7";
+
+            changes["L1"] = "U5";
+            changes["L4"] = "U4";
+            changes["L7"] = "U3";
         }
 
         if (ccw) {

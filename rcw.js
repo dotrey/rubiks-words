@@ -5,6 +5,7 @@
         constructor() {
             this.sides = [];
             this.sideOrder = "ULFRBD";
+            this.axis = "MES";
             this.adjacentFaces = {
                 "U": [
                     "F2", "F1", "F0", "L2", "L1", "L0", "B2", "B1", "B0", "R2", "R1", "R0"
@@ -76,6 +77,10 @@
         }
         rotate(side, ccw = false) {
             side = side.toUpperCase();
+            if (this.axis.indexOf(side) > -1) {
+                this.rotateAxis(side, ccw);
+                return;
+            }
             if (this.sideOrder.indexOf(side) < 0) {
                 throw new Error("Unknown side " + side);
             }
@@ -90,6 +95,59 @@
             changes[side + "3"] = side + "1";
             for (let i = 0; i < 12; i++) {
                 changes[this.adjacentFaces[side][i]] = this.adjacentFaces[side][(i + 3) % 12];
+            }
+            if (ccw) {
+                let tmp = {};
+                for (let key in changes) {
+                    tmp[changes[key]] = key;
+                }
+                changes = tmp;
+            }
+            this.changeFaces(changes);
+        }
+        rotateAxis(axis, ccw = false) {
+            let changes = {};
+            if (axis === "M") {
+                changes["F1"] = "D1";
+                changes["F4"] = "D4";
+                changes["F7"] = "D7";
+                changes["D1"] = "B1";
+                changes["D4"] = "B4";
+                changes["D7"] = "B7";
+                changes["B1"] = "U1";
+                changes["B4"] = "U4";
+                changes["B7"] = "U7";
+                changes["U1"] = "F1";
+                changes["U4"] = "F4";
+                changes["U7"] = "F7";
+            }
+            else if (axis === "E") {
+                changes["F3"] = "R3";
+                changes["F4"] = "R4";
+                changes["F5"] = "R5";
+                changes["R3"] = "B3";
+                changes["R4"] = "B4";
+                changes["R5"] = "B5";
+                changes["B3"] = "L3";
+                changes["B4"] = "L4";
+                changes["B5"] = "L5";
+                changes["L3"] = "F3";
+                changes["L4"] = "F4";
+                changes["L5"] = "F5";
+            }
+            else if (axis === "S") {
+                changes["U3"] = "R1";
+                changes["U4"] = "R4";
+                changes["U5"] = "R7";
+                changes["R1"] = "D5";
+                changes["R4"] = "D4";
+                changes["R7"] = "D3";
+                changes["D3"] = "L1";
+                changes["D4"] = "L4";
+                changes["D5"] = "L7";
+                changes["L1"] = "U5";
+                changes["L4"] = "U4";
+                changes["L7"] = "U3";
             }
             if (ccw) {
                 let tmp = {};
@@ -162,47 +220,79 @@
             }
             this.monospace.innerText = value;
         }
+        setCounter(value) {
+            if (!this.counter) {
+                return;
+            }
+            this.counter.innerText = "#" + value;
+        }
         createButtons() {
-            let btns1 = document.querySelector(".buttons-main");
+            let container = document.querySelector(".buttons");
             let btnCreate = document.createElement("button");
             btnCreate.type = "button";
             btnCreate.innerText = "create";
             btnCreate.addEventListener("click", () => {
                 this.finder.build(this.exportInput());
             });
-            btns1 === null || btns1 === void 0 ? void 0 : btns1.append(btnCreate);
-            let btnRandom = document.createElement("button");
-            btnRandom.type = "button";
-            btnRandom.innerText = "random";
-            btnRandom.addEventListener("click", () => {
-                this.finder.startRandom();
+            container === null || container === void 0 ? void 0 : container.append(btnCreate);
+            this.createWordlist();
+            this.createButtonsRotate();
+            this.createButtonsExecute();
+        }
+        createWordlist() {
+            let container = document.querySelector(".random");
+            let btnStartRandom = document.createElement("button");
+            btnStartRandom.type = "button";
+            btnStartRandom.innerText = "start random";
+            btnStartRandom.addEventListener("click", () => {
+                this.finder.startRandom(this.wordlist.value);
             });
-            btns1 === null || btns1 === void 0 ? void 0 : btns1.append(btnRandom);
-            let btns2 = document.querySelector(".buttons-rotate");
-            let buttons = {
-                "F": "Front",
-                "R": "Right",
-                "U": "Up",
-                "L": "Left",
-                "B": "Back",
-                "D": "Down",
-                "F'": "Front CCW",
-                "R'": "Right CCW",
-                "U'": "Up CCW",
-                "L'": "Left CCW",
-                "B'": "Back CCW",
-                "D'": "Down CCW"
-            };
-            for (let key in buttons) {
+            container === null || container === void 0 ? void 0 : container.append(btnStartRandom);
+            container === null || container === void 0 ? void 0 : container.append(" ");
+            let btnStopRandom = document.createElement("button");
+            btnStopRandom.type = "button";
+            btnStopRandom.innerText = "stop random";
+            btnStopRandom.addEventListener("click", () => {
+                this.finder.stopRandom();
+            });
+            container === null || container === void 0 ? void 0 : container.append(btnStopRandom);
+            this.counter = document.createElement("span");
+            container === null || container === void 0 ? void 0 : container.append(" ");
+            container === null || container === void 0 ? void 0 : container.append(this.counter);
+            this.wordlist = document.createElement("textarea");
+            container === null || container === void 0 ? void 0 : container.append(this.wordlist);
+        }
+        createButtonsRotate() {
+            let container = document.querySelector(".buttons-rotate");
+            let buttons = ["F", "B", "R", "L", "U", "D", "F'", "B'", "R'", "L'", "U'", "D'", "M", "E", "S", "M'", "E'", "S'"];
+            for (let move of buttons) {
                 let tmp = document.createElement("button");
-                tmp.innerText = buttons[key];
+                tmp.innerText = move;
                 tmp.addEventListener("click", ((m) => {
                     return () => {
                         this.finder.rotate(m);
                     };
-                })(key));
-                btns2 === null || btns2 === void 0 ? void 0 : btns2.append(tmp);
+                })(move));
+                container === null || container === void 0 ? void 0 : container.append(tmp);
             }
+        }
+        createButtonsExecute() {
+            let container = document.querySelector(".execute");
+            let input = document.createElement("textarea");
+            container === null || container === void 0 ? void 0 : container.append(input);
+            let btn = document.createElement("button");
+            btn.innerText = "execute";
+            container === null || container === void 0 ? void 0 : container.append(btn);
+            container === null || container === void 0 ? void 0 : container.append(" ");
+            let lbl = document.createElement("label");
+            let chk = document.createElement("input");
+            chk.type = "checkbox";
+            lbl.append(chk);
+            lbl.append(" de");
+            container === null || container === void 0 ? void 0 : container.append(lbl);
+            btn.addEventListener("click", () => {
+                this.finder.executeMoves(input.value, chk.checked);
+            });
         }
         createInputs(container, prefix) {
             for (let i = 0; i < 9; i++) {
@@ -233,9 +323,17 @@
     class Finder {
         constructor() {
             this.wordlist = [];
-            this.moveset = ["F", "R", "U", "L", "B", "D", "F'", "R'", "U'", "L'", "B'", "D'"];
+            this.moveset = ["F", "R", "U", "L", "B", "D", "M", "E", "S", "F'", "R'", "U'", "L'", "B'", "D'", "M'", "E'", "S'"];
+            this.germanMovesetMap = {
+                "V": "F",
+                "H": "B",
+                "L": "L",
+                "R": "R",
+                "U": "D",
+                "O": "U"
+            };
             this.attempts = 0;
-            this.maxAttempts = 10000;
+            this.randomRunning = false;
             this.ui = new Ui(this);
             this.ui.build();
             this.ui.fillInputs("scinsushlmtmoneiyifateebneertstmrindescthekatdlnabitna");
@@ -251,24 +349,57 @@
             this.cube.rotate(move[0], move.length === 2);
             this.ui.setMonospace(this.cube.prettyPrint());
         }
-        startRandom() {
+        startRandom(rawWords) {
             if (!this.cube) {
                 return;
             }
+            this.wordlist = rawWords.split(",").map((value) => {
+                return value.trim().toLowerCase();
+            });
             this.ui.clearList();
             this.attempts = 0;
+            this.randomRunning = true;
             this.random();
+        }
+        stopRandom() {
+            this.randomRunning = false;
+        }
+        executeMoves(rawMoves, germanMap = false) {
+            if (germanMap) {
+                for (let de in this.germanMovesetMap) {
+                    rawMoves = rawMoves.replace(new RegExp(de, "g"), this.germanMovesetMap[de]);
+                }
+            }
+            let moves = [];
+            for (let i = 0, ic = rawMoves.length; i < ic; i++) {
+                let tmp = rawMoves[i];
+                if (tmp === "'" && moves.length > 0) {
+                    if (moves[moves.length - 1].length === 1) {
+                        moves[moves.length - 1] += "'";
+                    }
+                }
+                else if (this.moveset.indexOf(tmp) > -1) {
+                    moves.push(tmp);
+                }
+            }
+            console.log("executing moves: " + moves.join(" "));
+            let executor = () => {
+                if (!moves.length) {
+                    return;
+                }
+                this.rotate(moves.shift());
+                window.requestAnimationFrame(executor);
+            };
+            executor();
         }
         random() {
             this.attempts++;
-            if (this.attempts % 1000 === 0) {
-                this.ui.appendList("attempt #" + this.attempts);
-            }
             let move = this.randomMoveNoCcw();
             this.cube.rotate(move[0], move.length > 1);
             this.check();
             this.ui.setMonospace(this.cube.prettyPrint());
-            if (this.attempts < this.maxAttempts) {
+            this.ui.setCounter(this.attempts);
+            if (this.randomRunning) {
                 window.requestAnimationFrame(() => {
                     this.random();
                 });
@@ -280,6 +411,9 @@
             let reversed = double.split("").reverse().join("");
             value = this.cube.toString(" ");
             for (let word of this.wordlist) {
+                if (!word) {
+                    continue;
+                }
                 if (double.indexOf(word) > -1) {
                     this.ui.appendList(value + " -> " + word);
                 }

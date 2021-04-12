@@ -4,6 +4,8 @@ export class Ui {
 
     private resultList : HTMLElement;
     private monospace : HTMLElement;
+    private wordlist : HTMLTextAreaElement;
+    private counter : HTMLElement;
 
     constructor(private finder : Finder) {
 
@@ -43,50 +45,96 @@ export class Ui {
         this.monospace.innerText = value;
     }
 
+    setCounter(value : string|number) {
+        if (!this.counter) {
+            return;
+        }
+        this.counter.innerText = "#" + value;
+    }
+
     private createButtons() {
-        let btns1 = document.querySelector(".buttons-main");
+        let container = document.querySelector(".buttons");
         let btnCreate = document.createElement("button");
         btnCreate.type = "button";
         btnCreate.innerText = "create";
         btnCreate.addEventListener("click", () => {
             this.finder.build(this.exportInput());
         })
-        btns1?.append(btnCreate);
+        container?.append(btnCreate);
+
+        this.createWordlist();
+        this.createButtonsRotate();
+        this.createButtonsExecute();
+    }
+
+    private createWordlist() {
+        let container = document.querySelector(".random");
         
-        let btnRandom = document.createElement("button");
-        btnRandom.type = "button";
-        btnRandom.innerText = "random";
-        btnRandom.addEventListener("click", () => {
-            this.finder.startRandom();
+        let btnStartRandom = document.createElement("button");
+        btnStartRandom.type = "button";
+        btnStartRandom.innerText = "start random";
+        btnStartRandom.addEventListener("click", () => {
+            this.finder.startRandom(this.wordlist.value);
         })
-        btns1?.append(btnRandom);
+        container?.append(btnStartRandom);
 
-        let btns2 = document.querySelector(".buttons-rotate");
-        let buttons : {[index : string] : string} = {
-            "F" : "Front",
-            "R" : "Right",
-            "U" : "Up",
-            "L" : "Left",
-            "B" : "Back",
-            "D" : "Down",
-            "F'" : "Front CCW",
-            "R'" : "Right CCW",
-            "U'" : "Up CCW",
-            "L'" : "Left CCW",
-            "B'" : "Back CCW",
-            "D'" : "Down CCW"
-        }
+        container?.append(" ");
+        
+        let btnStopRandom = document.createElement("button");
+        btnStopRandom.type = "button";
+        btnStopRandom.innerText = "stop random";
+        btnStopRandom.addEventListener("click", () => {
+            this.finder.stopRandom();
+        })
+        container?.append(btnStopRandom);
 
-        for (let key in buttons) {
+        this.counter = document.createElement("span");
+        container?.append(" ");
+        container?.append(this.counter);
+
+
+        this.wordlist = document.createElement("textarea");
+        container?.append(this.wordlist);
+    }
+
+    private createButtonsRotate() {
+        let container = document.querySelector(".buttons-rotate");
+        let buttons : string[] = ["F", "B", "R", "L", "U", "D", "F'", "B'", "R'", "L'", "U'", "D'", "M", "E", "S", "M'", "E'", "S'"];
+
+        for (let move of buttons) {
             let tmp = document.createElement("button");
-            tmp.innerText = buttons[key];
+            tmp.innerText = move;
             tmp.addEventListener("click", ((m : string) => {
                 return () => {
                     this.finder.rotate(m);
                 }
-            })(key));
-            btns2?.append(tmp);
+            })(move));
+            container?.append(tmp);
         }
+    }
+
+    private createButtonsExecute() {
+        let container = document.querySelector(".execute");
+        let input = document.createElement("textarea");
+        container?.append(input);
+
+        let btn = document.createElement("button");
+        btn.innerText = "execute";
+        container?.append(btn);
+        container?.append(" ");
+
+        let lbl = document.createElement("label");
+        let chk = document.createElement("input");
+        chk.type = "checkbox";
+        lbl.append(chk);
+        lbl.append(" de");
+        container?.append(lbl);
+
+        
+        btn.addEventListener("click", () => {
+            this.finder.executeMoves(input.value, chk.checked);
+        });
+
     }
     
     private createInputs(container : HTMLElement, prefix : string) {

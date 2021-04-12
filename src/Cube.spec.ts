@@ -15,7 +15,7 @@ describe("Cube", () => {
         let cube = Cube.fromString(str);
         expect(cube.toString().replace(/\s/g, "")).to.equal(str);
 
-        let sides : string[] = "ULFRBD".split("");
+        let sides : string[] = "ULFRBDMES".split("");
         for(let side of sides) {
             // rotate back and forth
             cube.rotate(side);
@@ -37,7 +37,7 @@ describe("Cube", () => {
         let cube = Cube.fromString(str);
         expect(cube.toString().replace(/\s/g, "")).to.equal(str);
 
-        let sides : string[] = "ULFRBD".split("");
+        let sides : string[] = "ULFRBDMES".split("");
         for(let side of sides) {
             cube.rotate(side);
         }

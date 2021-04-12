@@ -5,9 +5,17 @@ export class Finder {
     private cube : Cube;
     private ui : Ui;
     wordlist : string[] = [];
-    private moveset : string[] = ["F", "R", "U", "L", "B", "D", "F'", "R'", "U'", "L'", "B'", "D'"];
+    private moveset : string[] = ["F", "R", "U", "L", "B", "D", "M", "E", "S", "F'", "R'", "U'", "L'", "B'", "D'", "M'", "E'", "S'"];
+    private germanMovesetMap : {[index : string] : string} = {
+        "V" : "F",
+        "H" : "B",
+        "L" : "L",
+        "R" : "R",
+        "U" : "D",
+        "O" : "U"
+    };
     private attempts : number = 0;
-    maxAttempts : number = 10000;
+    private randomRunning : boolean = false;
 
     constructor() {
         this.ui = new Ui(this);
@@ -28,25 +36,61 @@ export class Finder {
         this.ui.setMonospace(this.cube.prettyPrint());
     }
 
-    startRandom() {
+    startRandom(rawWords : string) {
         if (!this.cube) {
             return;
         }
+        this.wordlist = rawWords.split(",").map((value : string) => {
+            return value.trim().toLowerCase();
+        });
         this.ui.clearList();
         this.attempts = 0;
+        this.randomRunning = true;
         this.random();
+    }
+
+    stopRandom() {
+        this.randomRunning = false;
+    }
+
+    executeMoves(rawMoves : string, germanMap : boolean = false) {
+        if (germanMap) {
+            for (let de in this.germanMovesetMap) {
+                rawMoves = rawMoves.replace(new RegExp(de, "g"), this.germanMovesetMap[de]);
+            }
+        }
+
+        let moves : string[] = [];
+        for (let i = 0, ic = rawMoves.length; i < ic; i++) {
+            let tmp = rawMoves[i];
+            if (tmp === "'" && moves.length > 0) {
+                if (moves[moves.length - 1].length === 1) {
+                    moves[moves.length - 1] += "'";
+                }
+            }else if (this.moveset.indexOf(tmp) > -1) {
+                moves.push(tmp)
+            }
+        }
+
+        console.log("executing moves: " + moves.join(" "));
+        let executor = () => {
+            if (!moves.length) {
+                return;
+            }
+            this.rotate(moves.shift());
+            window.requestAnimationFrame(executor);
+        }
+        executor();
     }
 
     private random() {
         this.attempts++;
-        if (this.attempts % 1000 === 0) {
-            this.ui.appendList("attempt #" + this.attempts);
-        }
         let move = this.randomMoveNoCcw();
         this.cube.rotate(move[0], move.length > 1);
         this.check();
         this.ui.setMonospace(this.cube.prettyPrint());
-        if (this.attempts < this.maxAttempts) {
+        this.ui.setCounter(this.attempts);
+        if (this.randomRunning) {
             window.requestAnimationFrame(() => {
                 this.random();
             });
@@ -61,6 +105,9 @@ export class Finder {
         value = this.cube.toString(" ");
         // check for the words in the list and print strings with matches
         for (let word of this.wordlist) {
+            if (!word) {
+                continue;
+            }
             if (double.indexOf(word) > -1) {
                 this.ui.appendList(value + " -> " + word);
             }
