@@ -174,13 +174,13 @@ export class Cube {
             changes["F4"] = "D4";
             changes["F7"] = "D7";
 
-            changes["D1"] = "B1";
+            changes["D1"] = "B7";
             changes["D4"] = "B4";
-            changes["D7"] = "B7";
+            changes["D7"] = "B1";
 
-            changes["B1"] = "U1";
+            changes["B7"] = "U1";
             changes["B4"] = "U4";
-            changes["B7"] = "U7";
+            changes["B1"] = "U7";
 
             changes["U1"] = "F1";
             changes["U4"] = "F4";
