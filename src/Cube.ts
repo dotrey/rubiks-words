@@ -1,3 +1,5 @@
+import { CubeFace } from "./CubeFace";
+
 export class Cube {
 
     /**
@@ -23,7 +25,7 @@ export class Cube {
      *            | D6 D7 D8 |
      *            +––––––––––+
      */
-    private sides : string[][] = [];
+    private sides : CubeFace[][] = [];
     // Up Left Front Right Back Down
     private sideOrder : string = "ULFRBD";
     // Middle (between L and R), Equator (between U and D), Standing (between F and B)
@@ -53,16 +55,22 @@ export class Cube {
     constructor() {
         this.sides = [];
         for (let i = 0; i < 6; i++) {
-            this.sides[i] = (new Array(9)).fill(this.sideOrder[i]);
+            for (let j = 0; j < 9; j++) {
+                this.sides[i] = (new Array(9)).fill(new CubeFace(this.sideOrder[i], i, j));
+            }
         }
     }
 
-    get(index : string) : string {
+    get(index : string) : CubeFace {
         let {side, face} = this.getSideFace(index);
         return this.sides[side][face];
     }
 
-    set(index : string, value : string) {
+    getFace(side : number, face : number) {
+        return this.sides[side][face];
+    }
+
+    set(index : string, value : CubeFace) {
         let {side, face} = this.getSideFace(index);
         this.sides[side][face] = value;
     }
@@ -84,8 +92,10 @@ export class Cube {
     }
 
     toString(spacer : string = "") {
-        return this.sides.map((side : string[]) => {
-            return side.join("");
+        return this.sides.map((side : CubeFace[]) => {
+            return side.map((face : CubeFace) => {
+                return face.value;
+            }).join("");
         }).join(spacer);
     }
 
@@ -234,7 +244,7 @@ export class Cube {
      */
     private changeFaces(changes : {[index : string] : string}) {
         // collect values of all sources
-        let sourceValues : {[index : string] : string} = {};
+        let sourceValues : {[index : string] : CubeFace} = {};
         for (let source in changes) {
             sourceValues[source] = this.get(source);
         }
@@ -263,7 +273,7 @@ export class Cube {
                 if (typeof colors[i] !== "undefined") {
                     val = colors[i];
                 }
-                cube.sides[s][f] = val;
+                cube.sides[s][f] = new CubeFace(val, s, f);
             }
         }
         return cube;

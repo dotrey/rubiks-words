@@ -21,11 +21,13 @@ export class Finder {
         this.ui = new Ui(this);
         this.ui.build();
         this.ui.fillInputs("scinsushlmtmoneiyifateebneertstmrindescthekatdlnabitna");
+        this.build(this.export());
     }
 
     build(colors : string) {
         this.cube = Cube.fromString(colors);
         this.ui.setMonospace(this.cube.pretty());
+        this.ui.set3d(this.cube)
     }
 
     rotate(move : string) {
@@ -34,6 +36,7 @@ export class Finder {
         }
         this.cube.rotate(move[0], move.length === 2);
         this.ui.setMonospace(this.cube.pretty());
+        this.ui.set3d(this.cube)
     }
 
     startRandom(rawWords : string) {
@@ -47,6 +50,21 @@ export class Finder {
         this.attempts = 0;
         this.randomRunning = true;
         this.random();
+    }
+
+    private random() {
+        this.attempts++;
+        let move = this.randomMoveNoCcw();
+        this.cube.rotate(move[0], move.length > 1);
+        this.check();
+        this.ui.setMonospace(this.cube.pretty());
+        this.ui.set3d(this.cube);
+        this.ui.setCounter(this.attempts);
+        if (this.randomRunning) {
+            window.requestAnimationFrame(() => {
+                this.random();
+            });
+        }
     }
 
     stopRandom() {
@@ -90,20 +108,6 @@ export class Finder {
             window.requestAnimationFrame(executor);
         }
         executor();
-    }
-
-    private random() {
-        this.attempts++;
-        let move = this.randomMoveNoCcw();
-        this.cube.rotate(move[0], move.length > 1);
-        this.check();
-        this.ui.setMonospace(this.cube.pretty());
-        this.ui.setCounter(this.attempts);
-        if (this.randomRunning) {
-            window.requestAnimationFrame(() => {
-                this.random();
-            });
-        }
     }
 
     private check() {

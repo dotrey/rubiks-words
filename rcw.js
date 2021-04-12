@@ -1,6 +1,20 @@
 (function () {
     'use strict';
 
+    class CubeFace {
+        constructor(value, side, face) {
+            this.value = "";
+            this.side = -1;
+            this.face = -1;
+            this.value = value;
+            this.side = side;
+            this.face = face;
+        }
+        toString() {
+            return this.value;
+        }
+    }
+
     class Cube {
         constructor() {
             this.sides = [];
@@ -28,11 +42,16 @@
             };
             this.sides = [];
             for (let i = 0; i < 6; i++) {
-                this.sides[i] = (new Array(9)).fill(this.sideOrder[i]);
+                for (let j = 0; j < 9; j++) {
+                    this.sides[i] = (new Array(9)).fill(new CubeFace(this.sideOrder[i], i, j));
+                }
             }
         }
         get(index) {
             let { side, face } = this.getSideFace(index);
+            return this.sides[side][face];
+        }
+        getFace(side, face) {
             return this.sides[side][face];
         }
         set(index, value) {
@@ -55,7 +74,9 @@
         }
         toString(spacer = "") {
             return this.sides.map((side) => {
-                return side.join("");
+                return side.map((face) => {
+                    return face.value;
+                }).join("");
             }).join(spacer);
         }
         pretty() {
@@ -183,7 +204,7 @@
                     if (typeof colors[i] !== "undefined") {
                         val = colors[i];
                     }
-                    cube.sides[s][f] = val;
+                    cube.sides[s][f] = new CubeFace(val, s, f);
                 }
             }
             return cube;
@@ -193,6 +214,7 @@
     class Ui {
         constructor(finder) {
             this.finder = finder;
+            this.cubeFaces = [];
         }
         build() {
             this.createButtons();
@@ -202,6 +224,7 @@
             this.createInputs(document.querySelector(".cube-side.right"), "R");
             this.createInputs(document.querySelector(".cube-side.back"), "B");
             this.createInputs(document.querySelector(".cube-side.down"), "D");
+            this.setup3d();
         }
         clearList() {
             if (!this.resultList) {
@@ -224,6 +247,15 @@
             }
             this.monospace.innerText = value;
         }
+        set3d(cube) {
+            for (let s = 0; s < 6; s++) {
+                for (let f = 0; f < 9; f++) {
+                    let cf = cube.getFace(s, f);
+                    this.cubeFaces[s][f].innerText = cf.value;
+                    this.cubeFaces[s][f].setAttribute("data-color", "" + cf.side);
+                }
+            }
+        }
         setCounter(value) {
             if (!this.counter) {
                 return;
@@ -239,6 +271,23 @@
                 this.finder.build(this.exportInput());
             });
             container === null || container === void 0 ? void 0 : container.append(btnCreate);
+            container === null || container === void 0 ? void 0 : container.append(document.createElement("br"));
+            container === null || container === void 0 ? void 0 : container.append(document.createElement("br"));
+            let btnImport = document.createElement("button");
+            btnImport.innerText = "import";
+            btnImport.type = "button";
+            btnImport.addEventListener("click", () => {
+                this.fillInputs(window.prompt("Provide Colors", "UUUUUUUUULLLLLLLLLFFFFFFFFFRRRRRRRRRBBBBBBBBBDDDDDDDDD"));
+            });
+            container === null || container === void 0 ? void 0 : container.append(btnImport);
+            container === null || container === void 0 ? void 0 : container.append(" ");
+            let btnExport = document.createElement("button");
+            btnExport.innerText = "export";
+            btnExport.type = "button";
+            btnExport.addEventListener("click", () => {
+                window.prompt("Current Colors:", this.exportInput());
+            });
+            container === null || container === void 0 ? void 0 : container.append(btnExport);
             this.createWordlist();
             this.createButtonsRotate();
             this.createButtonsExecute();
@@ -298,6 +347,65 @@
                 this.finder.executeMoves(input.value, chk.checked);
             });
         }
+        setup3d() {
+            let container = document.querySelector(".cube3d-frame");
+            if (!container) {
+                return;
+            }
+            let startX = 0;
+            let startY = 0;
+            let rotationX = 0;
+            let rotationY = 0;
+            let mousedown = false;
+            container.addEventListener("contextmenu", (event) => {
+                rotationX = 0;
+                rotationY = 0;
+                container.setAttribute("style", "--rotation-x: " + rotationX + "deg; --rotation-y: " + rotationY + "deg");
+                event.preventDefault();
+            });
+            container.addEventListener("mousedown", (event) => {
+                mousedown = true;
+                startX = event.clientX;
+                startY = event.clientY;
+            });
+            container.addEventListener("mouseup", (event) => {
+                mousedown = false;
+                let dX = event.clientX - startX;
+                let dY = event.clientY - startY;
+                rotationX += dY * -1;
+                rotationY += dX * 1;
+                container.setAttribute("style", "--rotation-x: " + rotationX + "deg; --rotation-y: " + rotationY + "deg");
+            });
+            container.addEventListener("mousemove", (event) => {
+                if (mousedown) {
+                    let dX = event.clientX - startX;
+                    let dY = event.clientY - startY;
+                    let rX = rotationX + dY * -1;
+                    let rY = rotationY + dX * 1;
+                    container.setAttribute("style", "--rotation-x: " + rX + "deg; --rotation-y: " + rY + "deg");
+                }
+            });
+            let faces = [
+                "up", "left", "front", "right", "back", "down"
+            ];
+            let cube = document.createElement("div");
+            cube.classList.add("cube3d");
+            let gridArea = "abcdefghi";
+            for (let s = 0; s < 6; s++) {
+                this.cubeFaces[s] = [];
+                let face = document.createElement("div");
+                face.classList.add("face-" + faces[s]);
+                cube.append(face);
+                for (let f = 0; f < 9; f++) {
+                    let e = document.createElement("div");
+                    e.classList.add("cube-face");
+                    e.style.gridArea = gridArea[f];
+                    this.cubeFaces[s][f] = e;
+                    face.append(e);
+                }
+            }
+            container.append(cube);
+        }
         createInputs(container, prefix) {
             for (let i = 0; i < 9; i++) {
                 let e = document.createElement("input");
@@ -309,6 +417,9 @@
             }
         }
         fillInputs(values) {
+            if (!values) {
+                return;
+            }
             document.querySelectorAll(".cube-side input").forEach((element, index) => {
                 if (typeof values[index] !== "undefined") {
                     element.value = values[index];
@@ -341,10 +452,12 @@
             this.ui = new Ui(this);
             this.ui.build();
             this.ui.fillInputs("scinsushlmtmoneiyifateebneertstmrindescthekatdlnabitna");
+            this.build(this.export());
         }
         build(colors) {
             this.cube = Cube.fromString(colors);
             this.ui.setMonospace(this.cube.pretty());
+            this.ui.set3d(this.cube);
         }
         rotate(move) {
             if (!this.cube || this.moveset.indexOf(move) < 0) {
@@ -352,6 +465,7 @@
             }
             this.cube.rotate(move[0], move.length === 2);
             this.ui.setMonospace(this.cube.pretty());
+            this.ui.set3d(this.cube);
         }
         startRandom(rawWords) {
             if (!this.cube) {
@@ -364,6 +478,20 @@
             this.attempts = 0;
             this.randomRunning = true;
             this.random();
+        }
+        random() {
+            this.attempts++;
+            let move = this.randomMoveNoCcw();
+            this.cube.rotate(move[0], move.length > 1);
+            this.check();
+            this.ui.setMonospace(this.cube.pretty());
+            this.ui.set3d(this.cube);
+            this.ui.setCounter(this.attempts);
+            if (this.randomRunning) {
+                window.requestAnimationFrame(() => {
+                    this.random();
+                });
+            }
         }
         stopRandom() {
             this.randomRunning = false;
@@ -402,19 +530,6 @@
                 window.requestAnimationFrame(executor);
             };
             executor();
-        }
-        random() {
-            this.attempts++;
-            let move = this.randomMoveNoCcw();
-            this.cube.rotate(move[0], move.length > 1);
-            this.check();
-            this.ui.setMonospace(this.cube.pretty());
-            this.ui.setCounter(this.attempts);
-            if (this.randomRunning) {
-                window.requestAnimationFrame(() => {
-                    this.random();
-                });
-            }
         }
         check() {
             let value = this.cube.toString();
