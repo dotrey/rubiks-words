@@ -1,6 +1,7 @@
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import filesize from "rollup-plugin-filesize";
+import {terser} from "rollup-plugin-terser";
 
 export default {
     input: "built/main.js",
@@ -17,6 +18,8 @@ export default {
       commonjs({
           include : "node_modules/**"
       }),
+      
+      terser(),
 
       filesize()
   ]
