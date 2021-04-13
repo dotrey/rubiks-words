@@ -155,16 +155,23 @@ export class Ui {
         container?.append(btn);
         container?.append(" ");
 
-        let lbl = document.createElement("label");
-        let chk = document.createElement("input");
-        chk.type = "checkbox";
-        lbl.append(chk);
-        lbl.append(" de");
-        container?.append(lbl);
+        let lblDe = document.createElement("label");
+        let chkDe = document.createElement("input");
+        chkDe.type = "checkbox";
+        lblDe.append(chkDe);
+        lblDe.append("de");
+        container?.append(lblDe);
 
+        let lblDbl = document.createElement("label");
+        let chkDbl = document.createElement("input");
+        chkDbl.type = "checkbox";
+        chkDbl.checked = false;
+        lblDbl.append(chkDbl);
+        lblDbl.append("dbl");
+        // container?.append(lblDbl);
         
         btn.addEventListener("click", () => {
-            this.finder.executeMoves(input.value, chk.checked);
+            this.finder.executeMoves(input.value, chkDbl.checked, chkDe.checked);
         });
 
     }

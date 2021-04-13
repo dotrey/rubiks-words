@@ -1,23 +1,18 @@
 import { Cube } from "./Cube";
+import { MovePlanner } from "./MovePlanner";
 import { Ui } from "./Ui";
 
 export class Finder {
     private cube : Cube;
     private ui : Ui;
+    private planner : MovePlanner;
     wordlist : string[] = [];
-    private moveset : string[] = ["F", "R", "U", "L", "B", "D", "M", "E", "S", "F'", "R'", "U'", "L'", "B'", "D'", "M'", "E'", "S'"];
-    private germanMovesetMap : {[index : string] : string} = {
-        "V" : "F",
-        "H" : "B",
-        "L" : "L",
-        "R" : "R",
-        "U" : "D",
-        "O" : "U"
-    };
+    
     private attempts : number = 0;
     private randomRunning : boolean = false;
 
     constructor() {
+        this.planner = new MovePlanner();
         this.ui = new Ui(this);
         this.ui.build();
         this.ui.fillInputs("scinsushlmtmoneiyifateebneertstmrindescthekatdlnabitna");
@@ -31,7 +26,7 @@ export class Finder {
     }
 
     rotate(move : string) {
-        if (!this.cube || this.moveset.indexOf(move) < 0) {
+        if (!this.cube || !this.planner.validMove(move)) {
             return;
         }
         this.cube.rotate(move[0], move.length === 2);
@@ -54,7 +49,7 @@ export class Finder {
 
     private random() {
         this.attempts++;
-        let move = this.randomMoveNoCcw();
+        let move = this.planner.randomMoveNoCcw();
         this.cube.rotate(move[0], move.length > 1);
         this.check();
         this.ui.setMonospace(this.cube.pretty());
@@ -71,33 +66,22 @@ export class Finder {
         this.randomRunning = false;
     }
 
-    executeMoves(rawMoves : string, germanMap : boolean = false) {
-        if (germanMap) {
-            for (let de in this.germanMovesetMap) {
-                rawMoves = rawMoves.replace(new RegExp(de, "g"), this.germanMovesetMap[de]);
-            }
-        }
-
-        // for double-moves the notation must be X2, where X is the original move
-        // -> R'R' must be written as R'2 and not R2'
-        // -> we correct this here
-        rawMoves = rawMoves.replace(/2'/g, "'2");
-
-        let moves : string[] = [];
-        for (let i = 0, ic = rawMoves.length; i < ic; i++) {
-            let tmp = rawMoves[i];
-            if (tmp === "'" && moves.length > 0) {
-                if (moves[moves.length - 1].length === 1) {
-                    moves[moves.length - 1] += "'";
-                }
-            }else if (tmp === "2" && moves.length > 0) {
-                moves.push(moves[moves.length - 1]);
-            }else if (this.moveset.indexOf(tmp) > -1) {
-                moves.push(tmp);
-            }else if (tmp.trim()) {
-                console.log("unknown move: '" + tmp + "'");
-            }
-        }
+    /**
+     * Executes all moves in a given string. Invalid characters are ignored.
+     * 
+     * - allowDoubleLayers: if true, lower case letters will be allowed to move two layers at 
+     *   once, see https://en.wikipedia.org/wiki/Rubik%27s_Cube#Move_notation
+     *   Lower case f will be converted to FS, lower case b will be converted to BS'
+     *   - if false, given raw moves will be converted to uppercase to improve compatibility
+     * - germanNotation: if true, move-letters will be treated as german notation and converted
+     *   to english notation
+     * 
+     * @param rawMoves 
+     * @param allowDoubleLayers 
+     * @param germanNotation 
+     */
+    executeMoves(rawMoves : string, allowDoubleLayers : boolean = false, germanNotation : boolean = false) {        
+        let moves : string[] = this.planner.plan(rawMoves, allowDoubleLayers, germanNotation);
 
         console.log("executing moves: " + moves.join(" "));
         let executor = () => {
@@ -128,14 +112,6 @@ export class Finder {
                 this.ui.appendList(value + " <- " + word);
             }
         }
-    }
-
-    private randomMove() : string {
-        return this.moveset[Math.floor(Math.random() * this.moveset.length)];
-    }
-
-    private randomMoveNoCcw() : string {
-        return this.moveset[Math.floor(Math.random() * this.moveset.length * 0.5)];
     }
 
     export() : string {
