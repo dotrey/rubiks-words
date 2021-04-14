@@ -34,20 +34,20 @@ export class MovePlanner {
      * @param germanNotation 
      */
     plan(rawMoves : string, allowDoubleLayers : boolean = false, germanNotation : boolean = false) : string[] {
+        // for double-moves the notation must be X2, where X is the original move
+        // -> R'R' must be written as R'2 and not R2'
+        // -> we correct this here
+        rawMoves = rawMoves.replace(/2'/g, "'2");
+
         if (germanNotation) {
             rawMoves = this.convertGermanNotation(rawMoves);
         }
 
         if (allowDoubleLayers) {
-            rawMoves = this.convertDoubleMoves(rawMoves);
+            rawMoves = this.convertDoubleLayerMoves(rawMoves);
         }else{
             rawMoves = rawMoves.toUpperCase()
         }
-
-        // for double-moves the notation must be X2, where X is the original move
-        // -> R'R' must be written as R'2 and not R2'
-        // -> we correct this here
-        rawMoves = rawMoves.replace(/2'/g, "'2");
 
         let moves : string[] = [];
         for (let i = 0, ic = rawMoves.length; i < ic; i++) {
@@ -81,24 +81,33 @@ export class MovePlanner {
         return moves;
     }
 
-    private convertDoubleMoves(moves : string) : string {
+    private convertDoubleLayerMoves(moves : string) : string {
+        // duplicate double moves
+        moves = moves.replace(/([fbudlr]'?)2/g, "$1$1");
+
         // two front layers = Front and Standing
+        moves = moves.replace(/f'/g, "F'S'");
         moves = moves.replace(/f/g, "FS");
 
         // two back layers = Back and Standing CCW
+        moves = moves.replace(/b'/g, "B'S");
         moves = moves.replace(/b/g, "BS'");
 
         // two top layers = Up and Equator CCW
+        moves = moves.replace(/u'/g, "U'E");
         moves = moves.replace(/u/g, "UE'");
 
         // two bottom layers = Down and Equator
+        moves = moves.replace(/d'/g, "D'E'");
         moves = moves.replace(/d/g, "DE");
 
         // two left layers = Left and Middle
+        moves = moves.replace(/l'/g, "L'M'");
         moves = moves.replace(/l/g, "LM");
 
         // two right layers = Right and Middle CCW
-        moves = moves.replace(/u/g, "RM'");
+        moves = moves.replace(/r'/g, "R'M");
+        moves = moves.replace(/r/g, "RM'");
 
         return moves;
     }

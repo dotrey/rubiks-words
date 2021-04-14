@@ -153,7 +153,15 @@ export class Ui {
         let btn = document.createElement("button");
         btn.innerText = "execute";
         container?.append(btn);
-        container?.append(" ");
+        container?.append(document.createElement("br"));
+
+        let lblDbl = document.createElement("label");
+        let chkDbl = document.createElement("input");
+        chkDbl.type = "checkbox";
+        chkDbl.checked = true;
+        lblDbl.append(chkDbl);
+        lblDbl.append("2-layer");
+        container?.append(lblDbl);
 
         let lblDe = document.createElement("label");
         let chkDe = document.createElement("input");
@@ -161,14 +169,6 @@ export class Ui {
         lblDe.append(chkDe);
         lblDe.append("de");
         container?.append(lblDe);
-
-        let lblDbl = document.createElement("label");
-        let chkDbl = document.createElement("input");
-        chkDbl.type = "checkbox";
-        chkDbl.checked = false;
-        lblDbl.append(chkDbl);
-        lblDbl.append("dbl");
-        // container?.append(lblDbl);
         
         btn.addEventListener("click", () => {
             this.finder.executeMoves(input.value, chkDbl.checked, chkDe.checked);
