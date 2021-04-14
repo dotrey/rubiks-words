@@ -257,10 +257,12 @@ main {
 .cube3d .cube-face[data-color="0"] {
     background: #00f;
     color: #fff;
+    transform: rotate(-90deg);
 }
 
 .cube3d .cube-face[data-color="1"] {
     background: #ff0;
+    transform: rotate(90deg);
 }
 
 .cube3d .cube-face[data-color="2"] {
@@ -269,6 +271,7 @@ main {
 
 .cube3d .cube-face[data-color="3"] {
     background: #fff;
+    transform: rotate(90deg);
 }
 
 .cube3d .cube-face[data-color="4"] {
@@ -279,4 +282,5 @@ main {
 .cube3d .cube-face[data-color="5"] {
     background: #080;
     color: #fff;
+    transform: rotate(-90deg);
 }
